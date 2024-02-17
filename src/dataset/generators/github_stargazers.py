@@ -4,17 +4,17 @@ from os import listdir
 from os.path import isfile, join
 import numpy as np
 import networkx as nx
-from src.dataset.generators.dataset import Dataset
+from src.dataset.dataset import Dataset
+
 from src.dataset.instances.graph import GraphInstance
 from src.dataset.generators.base import Generator
+ 
 
 
 class GithubStargazersGenerator(Generator):
     
     def init(self):
         print("Inizio inizializzazione di GithubStargazersGenerator.")
-
-        #self.dataset = Dataset()
 
         base_path = self.local_config['parameters']['data_dir']
         self.adj_matrix_filename = join(base_path, self.local_config['parameters']['adj_matrix_filename'])
