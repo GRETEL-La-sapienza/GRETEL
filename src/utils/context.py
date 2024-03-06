@@ -1,6 +1,7 @@
 import copy
 import inspect
 import os
+import re #aggiunta per sanificare file di lock per windows
 from flufl.lock import Lock
 from datetime import timedelta
 import jsonpickle
@@ -68,6 +69,14 @@ class Context(object):
             if(obj[key] == value):
                 return obj[son]
     
+    #questa  funzione sanifica il nome della directory ed  è stato aggiunto per un errore in windows
+    @staticmethod
+    def sanitize_filename(name):
+    # Rimuovi o sostituisci i caratteri non validi
+        sanitized = re.sub(r'[<>:"/\\|?*\s]', '_', name)  # Sostituisce con underscore
+        sanitized = re.sub(r'0x[0-9a-fA-F]+', '', sanitized)  # Rimuove la stringa '0x' e il successivo indirizzo
+        return sanitized
+
     def get_path(self, obj):
         fullname = self.get_fullname(obj).split('.')
         qualifier = fullname[1] + '_store_path'
@@ -78,11 +87,16 @@ class Context(object):
             directory = os.path.join(store_dir, str(obj.dataset))
         else:
             directory = store_dir
-        lock = Lock(directory+'.lck',lifetime=timedelta(hours=self.lock_release_tout))
+        #queste modifiche sono state fatte per dei caratteri non compatibili con windows nel file di lock
+        safe_directory = Context.sanitize_filename(directory)
+        lock_path = safe_directory + '.lck'
+        lock = Lock(lock_path, lifetime=timedelta(hours=self.lock_release_tout))
+        #queste modifiche sono state fatte per dei caratteri non compatibili con windows nel file di lock
+        #lock = Lock(directory+'.lck',lifetime=timedelta(hours=self.lock_release_tout))
         with lock:
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            return os.path.join(directory, obj.name)
+            if not os.path.exists(safe_directory):
+                os.makedirs(safe_directory)
+            return os.path.join(safe_directory, obj.name)
     
     @classmethod
     def get_fullname(cls, o):

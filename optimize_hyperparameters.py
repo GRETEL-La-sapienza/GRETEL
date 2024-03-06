@@ -53,7 +53,7 @@ def optuna_objective(trial,context,dataset):
     return accuracy
  
 if __name__ == "__main__":
-    context = Context.get_context(config_file="config/TGITG-12725-1.4M-GCN_OBSE0.jsonc")
+    context = Context.get_context(config_file="config/TGITG-12725-1.4M/TGITG-12725-1.4M-GCN_OBSE0.jsonc")
     context.run_number =  -1
     dataset_manager = EvaluatorManager(context)
     dataset = dataset_manager.get_dataset()

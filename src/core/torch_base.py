@@ -33,7 +33,10 @@ class TorchBase(Trainable):
         self.model.to(self.device)                            
     
     def real_fit(self):
-              
+
+        if isinstance(self.dataset,list): #aggiunto 
+            self.dataset = self.dataset[0] #aggiunto
+
         loader = self.dataset.get_torch_loader(fold_id=self.fold_id, batch_size=self.batch_size, usage='train')
         
         for epoch in range(self.epochs):
@@ -62,6 +65,7 @@ class TorchBase(Trainable):
             accuracy = self.accuracy(labels_list, preds)
             self.context.logger.info(f'epoch = {epoch} ---> loss = {np.mean(losses):.4f}\t accuracy = {accuracy:.4f}')
             self.lr_scheduler.step()
+        return accuracy #aggiunto ritorno del valore accuracy per ottimizzazione hyperparameters
             
     def check_configuration(self):
         super().check_configuration()
