@@ -38,7 +38,7 @@ class GithubStargazersGenerator(Generator):
         local_config['parameters']['graph_labels_filename'] = local_config['parameters'].get('graph_labels_filename','github_stargazers_graph_labels.txt')
         local_config['parameters']['num_adj_instances']= local_config['parameters'].get('num_adj_instances',5971562)
         local_config['parameters']['num_graphs']= local_config['parameters'].get('num_graphs',12725)
-        local_config['parameters']['max_number_nodes'] = local_config['parameters'].get('max_number_nodes', 10)
+        local_config['parameters']['max_number_nodes'] = local_config['parameters'].get('max_number_nodes', 15)
 
      
     def generate_dataset(self):
@@ -46,7 +46,8 @@ class GithubStargazersGenerator(Generator):
             # Carica la lista degli archi (coppie di nodi) 
             total_graphs_added = 0  # Inizializza un contatore per i grafi aggiunti
             # Costruisci il percorso al file desiderato per adj_matrix_filename
-            project_root_dir = '\\Users\\Roberto\\GRETEL\\'
+            #project_root_dir = '\\Users\\robertobruzzese\\GRETEL\\'
+            project_root_dir = '/Users/robertobruzzese/GRETEL/'
             adj_matrix_filename = os.path.join(project_root_dir, 'data', 'datasets', 'github_stargazers', 'github_stargazers_A.txt')           
             edges = np.loadtxt(adj_matrix_filename, delimiter=',',dtype=int)
             # Carica gli indicatori dei grafi
@@ -60,8 +61,9 @@ class GithubStargazersGenerator(Generator):
             for graph_id in range(1, self.num_graphs+1):
                 # Filtra gli archi per il grafo corrente
                 graph_nodes = np.where(graph_indicator == graph_id)[0] + 1 
-                if len(graph_nodes) >= self.max_number_nodes: 
-                   print(f"lunghezza nodi grafo {len(graph_nodes)}")
+                if len(graph_nodes) > self.max_number_nodes:
+                   continue 
+                print(f"lunghezza nodi grafo {len(graph_nodes)}")
                 #limita i grafi alla lunghezza massima di max_number_nodes: * attualmente commentato*
                 #if len(graph_nodes) > self.max_number_nodes:
                 #     continue # skiping the biggest graphs to optimize needed resources
@@ -94,7 +96,7 @@ class GithubStargazersGenerator(Generator):
                 # Stampa l'ID del grafo e il numero di nodi
                 print(f"Grafo ID: {graph_id}, Numero di nodi: {len(graph_nodes)}")
                 # Controlla se sono stati aggiunti 32 grafi e interrompe il ciclo se vero: *attualmente commentato*
-                if total_graphs_added == 32:
+                if total_graphs_added == 150: #32
                    print("Raggiunto il limite di 32 grafi aggiunti.")
                    break
                 # Stampa il numero totale di grafi aggiunti alla fine
@@ -112,7 +114,7 @@ def generate_node_features(graph: nx.Graph):
     degree_centrality = nx.degree_centrality(graph)
     betweenness_centrality = nx.betweenness_centrality(graph)
     clustering_index = nx.clustering(graph)
-    eigenvector_centrality = nx.eigenvector_centrality(graph)
+    eigenvector_centrality = nx.eigenvector_centrality(graph,max_iter=5000)
     closeness_centrality = nx.closeness_centrality(graph)
     num_nodes = graph.number_of_nodes()
 

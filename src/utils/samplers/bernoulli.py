@@ -39,9 +39,11 @@ class Bernoulli(Sampler):
         
         cf_candidate = GraphInstance(id=instance.id,
                                      label=1-instance.label,
-                                     data=adj.numpy(),
+                                     data = adj.cpu().numpy(),  # Modificata aggiunta per trasferire il tensore sulla CPU prima della conversione
+                                    # data=adj.numpy(),
                                      node_features=features,
-                                     edge_weights=probabilities[selected_edges[:, 0], selected_edges[:, 1]].numpy())
+                                     #edge_weights=probabilities[selected_edges[:, 0], selected_edges[:, 1]].numpy())
+                                     edge_weights=probabilities[selected_edges[:, 0], selected_edges[:, 1]].cpu().numpy())
         
         instance._dataset.manipulate(cf_candidate)
      

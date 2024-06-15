@@ -30,6 +30,8 @@ class TorchBase(Trainable):
             if torch.backends.mps.is_available()
             else "cpu"
         )
+        self.model.float()  #aggiunto  Assicura che tutti i parametri del modello siano in float32
+
         self.model.to(self.device)                            
     
     def real_fit(self):
@@ -44,14 +46,27 @@ class TorchBase(Trainable):
             preds = []
             labels_list = []
             for batch in loader:
+                #modifca aggiunta
+                #print("TorchBase")
+                #print("Dimensioni di batch.x:", batch.x.shape)
+                #print("Elementi in batch.x:", batch.x.nelement())
+                  # Controlla che i tensori non siano vuoti
+                #if batch.x.nelement() == 0 or batch.edge_index.nelement() == 0 or batch.edge_attr.nelement() == 0 or batch.y.nelement() == 0:
+                #  raise ValueError("Uno o più tensori di input sono vuoti.")
+                
                 batch.batch = batch.batch.to(self.device)
-                node_features = batch.x.to(self.device)
+                node_features = batch.x.float().to(self.device) #modificato 
+               #node_features = batch.x.to(self.device)
                 edge_index = batch.edge_index.to(self.device)
-                edge_weights = batch.edge_attr.to(self.device)
+                edge_weights = batch.edge_attr.float().to(self.device) #modificato
+                #edge_weights = batch.edge_attr.to(self.device)
                 labels = batch.y.to(self.device).long()
                 
                 self.optimizer.zero_grad()
                 
+                node_features = node_features.to(dtype=torch.float32)
+                edge_weights = edge_weights.to(dtype=torch.float32) # se utilizzati
+                #node_features=5
                 pred = self.model(node_features, edge_index, edge_weights, batch.batch)
                 loss = self.loss_fn(pred, labels)
                 losses.append(loss.to('cpu').detach().numpy())

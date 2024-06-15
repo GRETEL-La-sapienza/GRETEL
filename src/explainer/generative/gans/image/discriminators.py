@@ -1,6 +1,9 @@
+from numpy import float32
 import torch
 import torch.nn as nn
 from torch.nn import LeakyReLU
+
+from torch.autograd import gradcheck
 
 from src.utils.cfg_utils import default_cfg
 from src.core.factory_base import build_w_params_string
@@ -13,9 +16,10 @@ class SimpleDiscriminator(nn.Module):
         super(SimpleDiscriminator, self).__init__()
 
         self.training = False
+       # num_nodes = 10
         
         self.num_nodes = num_nodes
-        
+        print("num_nodes:", num_nodes)  # Stampa il valore di num_nodes
         self.device = (
             "cuda"
             if torch.cuda.is_available()
@@ -24,15 +28,21 @@ class SimpleDiscriminator(nn.Module):
             else "cpu"
         )
         
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=kernel, stride=stride)
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride)
+        #self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=kernel, stride=stride)
+        #self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride)
+        #self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride)
         
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=kernel, stride=stride).to(self.device).float() #modificato aggiunto
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride).to(self.device).float() #modificato aggiunto
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride,padding=(1, 1)).to(self.device).float() #modificato aggiunto
+        #self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=kernel, stride=stride)
+        
+
         self.act = build_w_params_string(activation)
         self.dropout = nn.Dropout2d(p=dropout_p)
         self.flatten = nn.Flatten()
 
-        self.fc_len = self.init_run()
+        self.fc_len = self.init_run(num_nodes)
         self.fc = nn.Linear(64 * self.fc_len**2, 1)
        
         self.init_weights()
@@ -51,11 +61,23 @@ class SimpleDiscriminator(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def init_run(self):
+    def init_run(self,num_nodes):
         with torch.no_grad():
-            dummy_input = torch.randn((1,1, self.num_nodes, self.num_nodes)).to(self.device)
-            x = self.conv3(self.conv2(self.conv1(dummy_input)))
+            #num_nodes = 10
+            dummy_input = torch.randn((1,1, num_nodes, num_nodes)).to(self.device)
+            print(dummy_input.size())
+            x = self.conv1(dummy_input)
+            print("Output after conv1:", x.shape)
+            x = self.conv2(x)
+            print("Output after conv2:", x.shape)
+                
+            x = self.conv3(x)
+            print("Output after conv3:", x.shape)
+            #x = self.conv3(self.conv2(self.conv1(dummy_input)))
+
         return x.shape[-1]
+   
+
 
     def add_gaussian_noise(self, x, sttdev=0.2):
         noise = torch.randn(x.size(), device=self.device).mul_(sttdev)
@@ -77,7 +99,12 @@ class SimpleDiscriminator(nn.Module):
         x = self.dropout(x)
         x = self.act(self.conv3(x))
         x = self.dropout(x)
+        #print("Dimensione di x prima del flattening:", x.shape)
         x = self.flatten(x)
+        #print("Dimensione di x dopo il flattening:", x.shape)
+        if x.shape[1] != self.fc.in_features:
+            raise ValueError(f"Dimensione di input per self.fc non valida: atteso {self.fc.in_features}, ottenuto {x.shape[1]}")
+    
         x = torch.sigmoid(self.fc(x))
         return x
     

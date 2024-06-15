@@ -5,59 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ENSEMBLE_RESULTS.jsonc",
-            "type": "python",
-            "request": "launch",
-            "program": "main.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["config/_papers/ijcai24/datasets_Ens[components-A]-in.jsonc", "1"],
-        },
-        {
-            "name": "TCR-150-100-0.3+TCC+iRand.jsonc",
-            "type": "python",
-            "request": "launch",
-            "program": "main.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["config/TCR-150-100-0.3+TCC+iRand.jsonc", "1"],
-        },
-        {
-            "name": "BBBP_KNN-MOL_DCE",
-            "type": "python",
-            "request": "launch",
-            "program": "main.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["config/BBBP_KNN-MOL_DCE.json", "1"],
-        },
-        {
-            "name": "Python: Current File with profiler",
-            "type": "python",
-            "request": "launch",
-            "module": "cProfile",
-            "console": "integratedTerminal",
-            "args": [
-                "-o", "output/tmp.prof", "${file}","config/test/test_TC.json", "1"
-            ]
-        },
-        {
-            "name": "Python: Current File",
-            "type": "python",
+            "name": "Debugger Python: File corrente",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["config/test/test_TC.json", "1"],
+            "console": "integratedTerminal"
         },
         {
-            "name": "RSGG_ASD",
+            "name": "GCN_IRAND",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["config/RSGG_ASD.json", "1"],
-        }       
+            "args": [
+                "config/TGITG-12725-1.4M/TGITG-12725-1.4M-GCN_CLEAR0_0.jsonc",
+                "1"
+            ],
+            "python": "/Users/robertobruzzese/miniconda3/envs/GRTL/bin/python"
+        }
     ]
 }

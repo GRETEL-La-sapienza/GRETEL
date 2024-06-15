@@ -19,10 +19,20 @@ class OracleTorch(TorchBase, Oracle):
         losses = []
         labels_list, preds = [], []
         for batch in loader:
+            #aggiunta modifica
+            #print("Torch")
+            #print("Dimensioni di batch.x durante test:", batch.x.shape)
+            #print("Elementi in batch.x durante test:", batch.x.nelement())
+
+            #aggiunta modifica
+            if batch.x.nelement() == 0 or batch.edge_index.nelement() == 0 or batch.edge_attr.nelement() == 0 or batch.y.nelement() == 0:
+                raise ValueError("Uno o più tensori di input sono vuoti.")
             batch.batch = batch.batch.to(self.device)
-            node_features = batch.x.to(self.device)
+            node_features = batch.x.float().to(self.device) #modificato 
+            #node_features = batch.x.to(self.device)
             edge_index = batch.edge_index.to(self.device)
-            edge_weights = batch.edge_attr.to(self.device)
+            edge_weights = batch.edge_attr.float().to(self.device) #modificato
+            #edge_weights = batch.edge_attr.to(self.device)
             labels = batch.y.to(self.device).long()
             
             self.optimizer.zero_grad()  
@@ -43,9 +53,17 @@ class OracleTorch(TorchBase, Oracle):
     @torch.no_grad()
     def _real_predict_proba(self, data_inst):
         data_inst = TorchGeometricDataset.to_geometric(data_inst)
-        node_features = data_inst.x.to(self.device)
+
+        #modifica aggiunta  Controlla se i tensori sono vuoti prima di procedere
+        #if data_inst.x.nelement() == 0 or data_inst.edge_index.nelement() == 0 or data_inst.edge_attr.nelement() == 0:
+        #    raise ValueError("Uno o più tensori di input sono vuoti.")
+
+
+        node_features = data_inst.x.float().to(self.device) #modificato
+        #node_features = data_inst.x.to(self.device)
         edge_index = data_inst.edge_index.to(self.device)
-        edge_weights = data_inst.edge_attr.to(self.device)
+        edge_weights = data_inst.edge_attr.float().to(self.device) #modificato
+        #edge_weights = data_inst.edge_attr.to(self.device)
         
         return self.model(node_features,edge_index,edge_weights, None).cpu().squeeze()
                      

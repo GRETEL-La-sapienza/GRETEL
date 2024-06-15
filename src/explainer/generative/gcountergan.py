@@ -42,6 +42,8 @@ class GCounteRGAN(PerClassExplainer):
             self.local_config['parameters']['sampler']['parameters']
         )
         self.send_to_device()
+        #self.send_to_device().to(torch.float32) #modificato aggiunto
+        #self.model.to(torch.float32) #modificato aggiunto
 
     def explain(self, instance) -> torch.Tensor:
         """

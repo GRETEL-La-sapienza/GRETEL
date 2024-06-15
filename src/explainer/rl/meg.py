@@ -173,7 +173,7 @@ class MEGAgent:
         self.replay_buffer_size = replay_buffer_size
         
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-                
+        #print(f"----passa da megagent----")     
         self.dqn, self.target_dqn = (
            DQN(num_input, num_output).to(self.device),
            DQN(num_input, num_output).to(self.device)

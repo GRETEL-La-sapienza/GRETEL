@@ -45,14 +45,23 @@ class BaseGAN(TorchBase):
             if torch.backends.mps.is_available()
             else "cpu"
         )        
-        self.generator.to(torch.double)
-        self.discriminator.to(torch.double)
+       # self.generator.to(torch.double)
+       # self.discriminator.to(torch.double)
         
-        self.generator.to(self.device)
-        self.discriminator.to(self.device)
+        #self.generator.to(self.device)
+        #self.discriminator.to(self.device)
 
-        self.generator.device = self.device
-        self.discriminator.device = self.device
+        #self.generator.device = self.device
+        #self.discriminator.device = self.device
+
+        # Modifica la conversione dei modelli al tipo di dati corretto e spostali sul dispositivo adeguato
+        self.generator.to(self.device).to(torch.float32) #modificato aggiunto
+        self.discriminator.to(self.device).to(torch.float32) #modificato aggiunto
+
+        # Assicurati che le proprietà del dispositivo siano aggiornate correttamente
+        self.generator.device = self.device #modificato aggiunto
+        self.discriminator.device = self.device #modificato aggiunto
+
 
         self.model = [
             self.generator,
